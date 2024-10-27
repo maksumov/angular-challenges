@@ -1,45 +1,50 @@
-import { AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { map } from 'rxjs/operators';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+} from '@angular/core';
 import {
   FakeHttpService,
   randStudent,
 } from '../../data-access/fake-http.service';
 import { StudentStore } from '../../data-access/student.store';
 import { CardComponent } from '../../ui/card/card.component';
+import { ListItemRefDirective } from '../../ui/list-item/list-item-ref.directive';
+import { ListItemComponent } from '../../ui/list-item/list-item.component';
 
 @Component({
   selector: 'app-student-card',
   template: `
-    <app-card
-      [list]="persons$ | async"
-      (delete)="onDelete($event)"
-      (addNewItem)="onAddOne()">
-      <img src="assets/img/student.webp" width="200px" />
+    <app-card [list]="students()" (addNewItem)="onAddOne()">
+      <img
+        src="assets/img/student.webp"
+        width="200px"
+        height="200px"
+        alt="illustration of students" />
+      <ng-template listItemRef let-item>
+        <app-list-item [id]="item.id" (delete)="onDelete($event)">
+          {{ item.firstName }}
+        </app-list-item>
+      </ng-template>
     </app-card>
   `,
   standalone: true,
   styles: [
     `
-      :host {
-        --background-color: rgba(0, 250, 0, 0.1);
+      app-card {
+        background-color: rgba(0, 250, 0, 0.1);
       }
     `,
   ],
-  imports: [CardComponent, AsyncPipe],
+  imports: [CardComponent, ListItemComponent, ListItemRefDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudentCardComponent implements OnInit {
-  public persons$ = this.store.students$.pipe(
-    map((students) =>
-      students.map(({ id, firstName }) => ({ id, name: firstName })),
-    ),
-  );
-
-  constructor(
-    private http: FakeHttpService,
-    private store: StudentStore,
-  ) {}
+  public students = computed(() => this.store.students());
+  private http = inject(FakeHttpService);
+  private store = inject(StudentStore);
 
   ngOnInit(): void {
     this.http.fetchStudents$.subscribe((s) => {

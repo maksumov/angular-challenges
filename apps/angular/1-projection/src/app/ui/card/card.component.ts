@@ -1,47 +1,46 @@
-import { NgFor } from '@angular/common';
+import { NgFor, NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Input,
-  Output,
+  contentChild,
+  input,
+  output,
+  TemplateRef,
 } from '@angular/core';
+import { ListItemRefDirective } from '../list-item/list-item-ref.directive';
 import { ListItemComponent } from '../list-item/list-item.component';
 
 @Component({
   selector: 'app-card',
   template: `
-    <div
-      class="custom-bg-color flex w-fit flex-col gap-3 rounded-md border-2 border-black p-4">
-      <ng-content select="img" />
-      <section>
-        @for (item of list; track item.id) {
-          <app-list-item
-            [name]="item.name"
-            [id]="item.id"
-            (delete)="delete.emit($event)"></app-list-item>
-        }
-      </section>
+    <ng-content select="img" />
+    <section>
+      @for (item of list(); track item.id) {
+        <ng-container
+          [ngTemplateOutlet]="itemTemplate()"
+          [ngTemplateOutletContext]="{ $implicit: item }">
+          <ng-content></ng-content>
+        </ng-container>
+      }
+    </section>
 
-      <button
-        class="rounded-sm border border-blue-500 bg-blue-300 p-2"
-        (click)="addNewItem.emit()">
-        Add
-      </button>
-    </div>
+    <button
+      class="rounded-sm border border-blue-500 bg-blue-300 p-2"
+      (click)="addNewItem.emit()">
+      Add
+    </button>
   `,
-  styles: `
-    .custom-bg-color {
-      background-color: var(--background-color);
-    }
-  `,
+  host: {
+    class: 'flex w-fit flex-col gap-3 rounded-md border-2 border-black p-4',
+  },
   standalone: true,
-  imports: [NgFor, ListItemComponent],
+  imports: [NgFor, ListItemComponent, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CardComponent {
-  @Input() list: any[] | null = null;
-
-  @Output() addNewItem = new EventEmitter<void>();
-  @Output() delete = new EventEmitter<number>();
+export class CardComponent<T extends { id: number }> {
+  list = input.required<T[]>();
+  itemTemplate = contentChild.required(ListItemRefDirective, {
+    read: TemplateRef,
+  });
+  addNewItem = output<void>();
 }

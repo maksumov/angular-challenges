@@ -1,27 +1,26 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Input,
-  Output,
+  input,
+  output,
 } from '@angular/core';
 
 @Component({
   selector: 'app-list-item',
   template: `
-    <div class="border-grey-300 flex justify-between border px-2 py-1">
-      {{ name }}
-      <button (click)="delete.emit(id)">
-        <img class="h-5" src="assets/svg/trash.svg" />
-      </button>
-    </div>
+    <ng-content></ng-content>
+    <button (click)="delete.emit(id())">
+      <img class="h-5" src="assets/svg/trash.svg" alt="delete" />
+    </button>
   `,
+  host: {
+    class: 'border-grey-300 flex justify-between border px-2 py-1',
+  },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListItemComponent {
-  @Input() id!: number;
-  @Input() name!: string;
-
-  @Output() delete = new EventEmitter<number>();
+  id = input.required<number>();
+  name = input<string>();
+  delete = output<number>();
 }
