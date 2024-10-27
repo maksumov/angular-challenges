@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { map } from 'rxjs/operators';
 import {
   FakeHttpService,
@@ -27,6 +27,7 @@ import { CardComponent } from '../../ui/card/card.component';
     `,
   ],
   imports: [CardComponent, AsyncPipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudentCardComponent implements OnInit {
   public persons$ = this.store.students$.pipe(

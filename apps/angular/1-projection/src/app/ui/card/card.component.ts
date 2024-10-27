@@ -1,5 +1,11 @@
 import { NgFor } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
 import { ListItemComponent } from '../list-item/list-item.component';
 
 @Component({
@@ -31,6 +37,7 @@ import { ListItemComponent } from '../list-item/list-item.component';
   `,
   standalone: true,
   imports: [NgFor, ListItemComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CardComponent {
   @Input() list: any[] | null = null;
