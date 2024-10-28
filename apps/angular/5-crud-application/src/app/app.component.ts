@@ -1,18 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit } from '@angular/core';
+import { TodoComponent } from './components/todo-item.component';
 import { Todo } from './models/todo.interface';
 import { TodosService } from './services/todos.service';
 
 @Component({
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TodoComponent],
   selector: 'app-root',
   template: `
     @for (todo of todos(); track todo.id) {
-      <div>
-        {{ todo.title }}
-        <button (click)="update(todo)">Update</button>
-      </div>
+      <app-todo-item [todo]="todo" (update)="update($event)"></app-todo-item>
     }
   `,
   styles: [],
