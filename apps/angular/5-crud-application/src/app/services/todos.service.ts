@@ -4,6 +4,11 @@ import { randText } from '@ngneat/falso';
 import { Todo } from '../models/todo.interface';
 
 const BASE_URL = 'https://jsonplaceholder.typicode.com/todos';
+const JSON_HEADERS = {
+  headers: {
+    'Content-type': 'application/json; charset=UTF-8',
+  },
+};
 
 @Injectable({
   providedIn: 'root',
@@ -28,11 +33,7 @@ export class TodosService {
           completed: todo.completed,
           userId: todo.userId,
         }),
-        {
-          headers: {
-            'Content-type': 'application/json; charset=UTF-8',
-          },
-        },
+        JSON_HEADERS,
       )
       .subscribe((todoUpdated: Todo) => {
         this.todos.update((todos) =>
@@ -50,7 +51,18 @@ export class TodosService {
   }
 
   statusToggle(todo: Todo) {
-    const updatedTodo: Todo = { ...todo, completed: !todo.completed };
-    this.update(updatedTodo);
+    this.http
+      .patch<Todo>(
+        `${BASE_URL}/${todo.id}`,
+        JSON.stringify({ completed: !todo.completed }),
+        JSON_HEADERS,
+      )
+      .subscribe((patchedTodo) => {
+        this.todos.update((todos) =>
+          todos.map((todo) =>
+            todo.id === patchedTodo.id ? patchedTodo : todo,
+          ),
+        );
+      });
   }
 }
