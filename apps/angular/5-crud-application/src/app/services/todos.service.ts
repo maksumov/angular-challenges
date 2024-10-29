@@ -3,6 +3,8 @@ import { inject, Injectable, signal } from '@angular/core';
 import { randText } from '@ngneat/falso';
 import { Todo } from '../models/todo.interface';
 
+const BASE_URL = 'https://jsonplaceholder.typicode.com/todos';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -11,17 +13,15 @@ export class TodosService {
   public todos = signal<Todo[]>([]);
 
   loadTodos() {
-    this.http
-      .get<Todo[]>('https://jsonplaceholder.typicode.com/todos')
-      .subscribe((todos) => {
-        this.todos.set(todos);
-      });
+    this.http.get<Todo[]>(BASE_URL).subscribe((todos) => {
+      this.todos.set(todos);
+    });
   }
 
   update(todo: Todo) {
     this.http
       .put<Todo>(
-        `https://jsonplaceholder.typicode.com/todos/${todo.id}`,
+        `${BASE_URL}/${todo.id}`,
         JSON.stringify({
           id: todo.id,
           title: randText(),
@@ -41,5 +41,16 @@ export class TodosService {
           ),
         );
       });
+  }
+
+  delete(id: Todo['id']) {
+    this.http.delete(`${BASE_URL}/${id}`).subscribe(() => {
+      this.todos.update((todos) => todos.filter((todo) => todo.id !== id));
+    });
+  }
+
+  statusToggle(todo: Todo) {
+    const updatedTodo: Todo = { ...todo, completed: !todo.completed };
+    this.update(updatedTodo);
   }
 }
